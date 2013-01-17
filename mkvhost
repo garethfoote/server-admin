@@ -1,0 +1,95 @@
+#!/bin/bash
+# vi: set ft=bash :
+
+replacevhost=$1;
+replacedomain=$2;
+ava="/etc/apache2/sites-available";
+ena="/etc/apache2/sites-enabled";
+
+if [[ ${replacevhost} == "" || ${replacedomain} == "" ]]; then
+    echo "Usage: mkvhost <replacevhost> <replacedomain>";
+    echo "Example: mkvhost www example.com";
+    echo "         will create the virtual host for www.example.com";
+    exit 0;
+else
+    vhost="${replacevhost}.${replacedomain}";
+fi
+
+# Create http host
+if [[ -e ${ava}/${vhost} ]]; then
+    echo "${ava}/${vhost} already exists. Skipping.";
+elif [[ -e ${ena}/${vhost} ]]; then
+    echo "${ena}/${vhost} already exists. Skipping.";
+else
+    if [[ ! -e ${ava}/template.http ]]; then
+        echo "${ava}/template.http does not exist. Cannot create ${ena}/${vhost}.";
+    else
+        cat ${ava}/template.http | sed "s/replacevhost/${replacevhost}/g" | sed "s/replacedomain/${replacedomain}/g" > ${ava}/${vhost}
+    fi
+fi
+
+# Create http ssl host
+#if [[ -e ${ava}/${vhost}.ssl ]]; then
+#    echo "${ava}/${vhost}.ssl already exists. Skipping.";
+#elif [[ -e ${ena}/${vhost}.ssl ]]; then
+#    echo "${ena}/${vhost}.ssl already exists. Skipping.";
+#else
+#    if [[ ! -e ${ava}/template.http.ssl ]]; then
+#        echo "${ava}/template.http.ssl does not exist. Cannot create ${ena}/${vhost}.ssl.";
+#    else
+#        cat ${ava}/template.http.ssl | sed "s/replacevhost/${replacevhost}/g" | sed "s/replacedomain/${replacedomain}/g" > ${ava}/${vhost}.ssl
+#    fi
+#fi
+
+bool="n";
+echo -n "Should I enable ${ava}/${vhost}? ";
+read bool;
+if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" || ${bool} == "Yes" ]]; then
+    if [[ -e ${ena}/${vhost} ]]; then
+        echo "Host was already enabled.";
+    else
+        if [[ ! -e ${ava}/${vhost} ]]; then
+            echo "${ava}/${vhost} does not exist so I cannot enable it.";
+        else
+            echo "Running: a2ensite ${vhost}";
+            a2ensite ${vhost};
+        fi
+    fi
+fi
+
+#bool="n";
+#echo -n "Should I enable ${ava}/${vhost}.ssl? ";
+#read bool;
+#if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" || ${bool} == "Yes" ]]; then
+#    if [[ -e ${ena}/${vhost}.ssl ]]; then
+#        echo "Host was already enabled.";
+#    else
+#        if [[ ! -e ${ava}/${vhost}.ssl ]]; then
+#            echo "${ava}/${vhost}.ssl does not exist so I cannot enable it.";
+#        else
+#            echo "Running: cp ${ava}/${vhost}.ssl ${ena}/${vhost}.ssl";
+#            cp ${ava}/${vhost}.ssl ${ena}/${vhost}.ssl;
+#        fi
+#    fi
+#fi
+
+bool="n";
+echo -n "Should I create /var/www/${vhost} for you? ";
+read bool;
+if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" || ${bool} == "Yes" ]]; then
+    if [[ -e /var/www/${vhost} ]]; then
+        echo "/var/www/${vhost} already existed.";
+    else
+        mkdir -p /var/www/{vhost};
+        chown -R www-data /var/www/{vhost};
+        chmod -R 755 /var/www/{vhost};
+    fi
+fi
+
+bool="n";
+echo -n "Should I reload Apache? ";
+read bool;
+if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" || ${bool} == "Yes" ]]; then
+    echo "Running: service apache2 restart";
+    service apache2 reload;
+fi
