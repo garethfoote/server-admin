@@ -1,5 +1,4 @@
 #!/bin/bash
-# vi: set ft=bash :
 
 replacevhost=$1;
 replacedomain=$2;
@@ -80,9 +79,10 @@ if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" |
     if [[ -e /var/www/${vhost} ]]; then
         echo "/var/www/${vhost} already existed.";
     else
-        mkdir -p /var/www/{vhost};
-        chown -R www-data /var/www/{vhost};
-        chmod -R 755 /var/www/{vhost};
+        mkdir -p /var/www/${vhost}/current/public;
+        chown -R www-data:www-data /var/www/${vhost}/current;
+        chmod -R 755 /var/www/${vhost}/current;
+        mkdir -p /var/log/apache2/${vhost};
     fi
 fi
 
