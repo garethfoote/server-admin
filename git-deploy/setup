@@ -1,0 +1,61 @@
+#!/bin/bash
+
+function ask {
+    while true; do
+
+        if [ "${2:-}" = "Y" ]; then
+            prompt="Y/n"
+            default=Y
+        elif [ "${2:-}" = "N" ]; then
+            prompt="y/N"
+            default=N
+        else
+            prompt="y/n"
+            default=
+        fi
+
+        # Ask the question
+        read -p "$1 [$prompt] " REPLY
+
+        # Default?
+        if [ -z "$REPLY" ]; then
+            REPLY=$default
+        fi
+
+        # Check if the reply is valid
+        case "$REPLY" in
+            Y*|y*) return 0 ;;
+            N*|n*) return 1 ;;
+        esac
+
+    done
+}
+# Get dir of script, not where its being run from.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Get name of repository, assuming it is the same as the dir name
+REPOSITORY_BASENAME=$(basename "$PWD")
+# Offer option to change this name
+read -p "Choose remote repository directory name [${REPOSITORY_BASENAME}]:" read_repo_name
+REPOSITORY_BASENAME=${read_repo_name:-$REPOSITORY_BASENAME}
+# Source the config file if exists.
+if [ ! -f deploy/.config ]
+then
+    echo "The deploy config file does not exist at deploy/.config"
+    exit
+fi
+source deploy/.config
+
+# Setup git deploy with remote deploy dir
+if ! ask "Have you setup a deploy remote?" N; then
+    git remote add production gareth@176.34.183.198:${remote_deploy_dir}/$REPOSITORY_BASENAME
+    echo "Added git remote (production) at gareth@176.34.183.198:${remote_deploy_dir}/$REPOSITORY_BASENAME"
+    git deploy setup -r production
+    git deploy init
+    # Overwrite restart script with custom.
+    cp $DIR/restart ./deploy/restart -f
+    git add deploy
+    git commit -m "Added deploy scripts"
+fi
+
+
+

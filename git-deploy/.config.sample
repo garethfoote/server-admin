@@ -1,0 +1,2 @@
+git_build_dir="build/public"
+remote_deploy_dir="/var/www/tenants.bootstrapcompany.co.uk"

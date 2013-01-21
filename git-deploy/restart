@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Set config variables
+source deploy/.config
+
+# cp current repo (tag)
+now=$(date +"%m_%d_%Y_%I%M%S")
+mkdir ../$now
+echo $git_build_dir
+cp $git_build_dir ../${now} -r
+
+# sym link
+rm -rf ../current
+ln -s ${now}/build ../current -f
+sudo chown www-data ../$now -R
+
+# If it exists run site-specific commands.
+if [ -f deploy/site-specific ]; then
+    deploy/site-specific
+fi
