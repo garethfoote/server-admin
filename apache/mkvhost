@@ -81,7 +81,7 @@ if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" |
     else
         mkdir -p /var/www/${vhost}/current/public;
         chown -R www-data:www-data /var/www/${vhost}/current;
-        chmod -R 775 /var/www/${vhost}/current;
+        chmod -R 775 /var/www/${vhost};
         mkdir -p /var/log/apache2/${vhost};
     fi
 fi
