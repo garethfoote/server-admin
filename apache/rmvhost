@@ -1,6 +1,5 @@
 #!/bin/bash
 
-bool="n";
 echo -n "Are you sure you want to delete vhost: ${1}? ";
 read bool;
 if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" || ${bool} == "Yes" ]]; then
