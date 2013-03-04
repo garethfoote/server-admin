@@ -1,0 +1,16 @@
+#!/bin/bash
+
+bool="n";
+echo -n "Are you sure you want to delete vhost: ${1}? ";
+read bool;
+if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" || ${bool} == "Yes" ]]; then
+    if [[ -e ${ena}/${vhost} ]]; then
+	a2dissite $1
+	echo "Deleting apache vhost"
+	rm /etc/apache2/sites-available/$1 -r
+	echo "Deleting apache logs"
+	rm /var/log/apache2/$1 -r
+    else
+    	echo "Aborted";
+    fi
+fi
