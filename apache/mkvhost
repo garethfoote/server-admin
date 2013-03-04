@@ -37,6 +37,7 @@ fi
 #        echo "${ava}/template.http.ssl does not exist. Cannot create ${ena}/${vhost}.ssl.";
 #    else
 #        cat ${ava}/template.http.ssl | sed "s/replacevhost/${replacevhost}/g" | sed "s/replacedomain/${replacedomain}/g" > ${ava}/${vhost}.ssl
+
 #    fi
 #fi
 
@@ -79,10 +80,20 @@ if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" |
     if [[ -e /var/www/${vhost} ]]; then
         echo "/var/www/${vhost} already existed.";
     else
-        mkdir -p /var/www/${vhost}/current/public;
+        sudo mkdir -p /var/www/${vhost}/current/public;
         chown -R www-data:www-data /var/www/${vhost}/current;
         chmod -R 775 /var/www/${vhost};
-        mkdir -p /var/log/apache2/${vhost};
+    fi
+fi
+
+bool="n";
+echo -n "Should I create /var/logs/apache/${vhost} for you? ";
+read bool;
+if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" || ${bool} == "Yes" ]]; then
+    if [[ -e /var/logs/apache/${vhost} ]]; then
+        echo "/var/logs/apache/${vhost} already existed.";
+    else
+        sudo mkdir -p /var/log/apache2/${vhost};
     fi
 fi
 
