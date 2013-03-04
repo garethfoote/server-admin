@@ -2,17 +2,37 @@
 
 replacevhost=$1;
 replacedomain=$2;
+replacesitesdir=""
 ava="/etc/apache2/sites-available";
 ena="/etc/apache2/sites-enabled";
 
 if [[ ${replacevhost} == "" || ${replacedomain} == "" ]]; then
-    echo "Usage: mkvhost <replacevhost> <replacedomain>";
-    echo "Example: mkvhost www example.com";
+    echo "Usage: mkvhost <replacevhost> <replacedomain> <environment>";
+    echo "Example: mkvhost www example.com production";
     echo "         will create the virtual host for www.example.com";
     exit 0;
 else
     vhost="${replacevhost}.${replacedomain}";
 fi
+
+# Set default env if none passed.
+if [ -z $3 ]
+then
+    env="production"
+else
+    env=$3
+fi
+
+# Set site directory based on evnvironment.
+case "$env" in
+    "production")
+        replacesitesdir="/var/www" ;;
+    "local")
+        replacesitesdir="/var/www/sites" ;;
+    *)
+        replacesitesdir="/var/www" ;;
+
+esac
 
 # Create http host
 if [[ -e ${ava}/${vhost} ]]; then
@@ -23,7 +43,7 @@ else
     if [[ ! -e ${ava}/template.http ]]; then
         echo "${ava}/template.http does not exist. Cannot create ${ena}/${vhost}.";
     else
-        cat ${ava}/template.http | sed "s/replacevhost/${replacevhost}/g" | sed "s/replacedomain/${replacedomain}/g" > ${ava}/${vhost}
+        cat ${ava}/template.http | sed "s/replacevhost/${replacevhost}/g" | sed "s/replacedomain/${replacedomain}/g" | sed "s/replacesitesdir/$(printf '%q' $replacesitesdir)/g" > ${ava}/${vhost}
     fi
 fi
 
@@ -73,15 +93,15 @@ fi
 #fi
 
 bool="n";
-echo -n "Should I create /var/www/${vhost} for you? ";
+echo -n "Should I create ${replacesitesdir}/${vhost} for you? ";
 read bool;
 if [[ ${bool} == "y" || ${bool} == "Y" || ${bool} == "yes" || ${bool} == "YES" || ${bool} == "Yes" ]]; then
-    if [[ -e /var/www/${vhost} ]]; then
-        echo "/var/www/${vhost} already existed.";
+    if [[ -e ${replacesitesdir}/${vhost} ]]; then
+        echo "${replacesitesdir}/${vhost} already existed.";
     else
-        mkdir -p /var/www/${vhost}/current/public;
-        chown -R www-data:www-data /var/www/${vhost}/current;
-        chmod -R 775 /var/www/${vhost};
+        mkdir -p ${replacesitesdir}/${vhost}/current/public;
+        chown -R www-data:www-data ${replacesitesdir}/${vhost}/current;
+        chmod -R 775 ${replacesitesdir}/${vhost};
         mkdir -p /var/log/apache2/${vhost};
     fi
 fi

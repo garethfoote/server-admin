@@ -2,12 +2,12 @@
         ServerAdmin gareth.foote+replacevhost.replacedomain@gmail.com
 
         ServerName replacevhost.replacedomain
-        DocumentRoot /var/www/replacevhost.replacedomain/current/public
+        DocumentRoot replacesitesdir/replacevhost.replacedomain/current/public
         <Directory />
                 Options FollowSymLinks
                 AllowOverride None
         </Directory>
-        <Directory /var/www/replacevhost.replacedomain/current/public>
+        <Directory replacesitesdir/replacevhost.replacedomain/current/public>
                 Options All MultiViews ExecCGI
                 AllowOverride all
                 Order allow,deny
